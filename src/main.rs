@@ -1,3 +1,6 @@
+mod layer;
+mod network;
+
 use rand::prelude::*;
 
 fn main() {
