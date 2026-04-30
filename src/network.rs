@@ -14,10 +14,10 @@ impl Network {
         Self { layers }
     }
 
-    pub fn forward(&mut self, input: &Array1<f64>) -> Array1<f64> {
+    pub fn forward(&mut self, input: Array1<f64>) -> Array1<f64> {
         let mut output = input.clone();
         for layer in &mut self.layers {
-            output = layer.forward(&input);
+            output = layer.forward(&output);
         }
         output
     }

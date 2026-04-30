@@ -14,6 +14,6 @@ impl Layer {
     }
 
     pub fn forward(&mut self, inputs: &Array1<f64>) -> Array1<f64> {
-        (&inputs.dot(&self.weight_matrix) + &self.bias_vector).map(|x| x.max(0.0))
+        (&self.weight_matrix.dot(inputs) + &self.bias_vector).map(|x| x.max(0.0))
     }
 }
