@@ -50,5 +50,5 @@ impl Layer {
         self.bias_vector -= &(db * lr);
     }
 
-    
+
 }

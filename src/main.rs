@@ -1,9 +1,11 @@
+use std::io;
+
 mod layer;
 mod network;
 
-use ndarray::Array;
+use ndarray::{Array, Array1};
 fn main() {
-    let conns = [1, 10, 20, 5, 1];
+    let conns = [1, 10, 20, 10, 1];
     let mut network = network::Network::new(&conns);
 
     const TRAINING_SIZE:usize = 1000;
@@ -31,8 +33,23 @@ fn main() {
         }
     }
 
-    let test_input = ndarray::array![0.2];
-    let output = network.forward(test_input);
+    let mut input = String::new();
 
-    println!("Input: 0.5 → Output: {:?}", output);
+    println!("valeur à tester :");
+
+    io::stdin().read_line(&mut input).unwrap();
+
+    let x: f64 = match input.trim().parse() {
+        Ok(v) => v,
+        Err(_) => {
+            println!("un nombre bordel");
+            return;
+        }
+    };
+
+    let input_array = Array1::from_vec(vec![x]);
+
+    let output = network.forward(input_array);
+
+    println!("Résultat du réseau : {}", output[0]);
 }
