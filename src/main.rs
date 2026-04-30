@@ -1,5 +1,3 @@
-use std::io;
-
 mod layer;
 mod network;
 
@@ -11,11 +9,13 @@ fn searched_function(x: f64) -> f64 {
 }
 
 fn plot(xs: &[f64], y_nn: &[f64], y_true: &[f64]) -> Result<(), Box<dyn std::error::Error>> {
+    use plotters::prelude::*;
+
     let root = BitMapBackend::new("curve.png", (900, 600)).into_drawing_area();
     root.fill(&WHITE)?;
 
     let mut chart = ChartBuilder::on(&root)
-        .caption("x² vs Neural Network", ("sans-serif", 30))
+        .caption("f:x vs Neural Network", ("sans-serif", 30))
         .margin(20)
         .x_label_area_size(30)
         .y_label_area_size(40)
@@ -23,15 +23,33 @@ fn plot(xs: &[f64], y_nn: &[f64], y_true: &[f64]) -> Result<(), Box<dyn std::err
 
     chart.configure_mesh().draw()?;
 
-    chart.draw_series(LineSeries::new(
-        xs.iter().zip(y_nn.iter()).map(|(&x, &y)| (x, y)),
-        &RED,
-    ))?;
-
+    // -------------------------
+    // VRAIE FONCTION (ligne bleue)
+    // -------------------------
     chart.draw_series(LineSeries::new(
         xs.iter().zip(y_true.iter()).map(|(&x, &y)| (x, y)),
         &BLUE,
-    ))?;
+    ))?
+        .label("x²")
+        .legend(|(x, y)| PathElement::new([(x, y), (x + 10, y)], &BLUE));
+
+    // -------------------------
+    // RÉSEAU (points rouges)
+    // -------------------------
+    chart.draw_series(
+        xs.iter().zip(y_nn.iter()).map(|(&x, &y)| {
+            Circle::new((x, y), 3, RED.filled())
+        }),
+    )?
+        .label("NN")
+        .legend(|(x, y)| Circle::new((x, y), 3, RED.filled()));
+
+    // -------------------------
+    // LÉGENDE
+    // -------------------------
+    chart.configure_series_labels()
+        .border_style(&BLACK)
+        .draw()?;
 
     Ok(())
 }
@@ -89,27 +107,4 @@ fn main() {
     }
 
     plot(&xs, &ys_nn, &ys_true).unwrap();
-
-    // -------------------------
-    // INTERACTIVE TEST
-    // -------------------------
-
-    let mut input = String::new();
-
-    println!("valeur à tester :");
-
-    io::stdin().read_line(&mut input).unwrap();
-
-    let x: f64 = match input.trim().parse() {
-        Ok(v) => v,
-        Err(_) => {
-            println!("un nombre bordel");
-            return;
-        }
-    };
-
-    let input_array = Array1::from_vec(vec![x]);
-    let output = network.forward(input_array);
-
-    println!("Résultat du réseau : {}", output[0]);
 }
